@@ -1,0 +1,26 @@
+# ============================================
+# AI Therapy Chatbot - Dependencies
+# ============================================
+
+# Backend Framework
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+
+# AI/LLM Integration
+groq==0.4.1
+
+# Database
+psycopg2-binary==2.9.9
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Frontend
+streamlit==1.29.0
+
+# HTTP Requests (for frontend to call backend)
+requests==2.31.0
+
+# Additional utilities (already included in above, but good to know)
+typing-extensions==4.8.0
