@@ -1,7 +1,6 @@
-fastapi==0.104.1
-uvicorn==0.24.0
-pydantic==2.5.0
-psycopg2-binary==2.9.9
-python-dotenv==1.0.0
+fastapi==0.115.0
+uvicorn==0.32.0
 google-generativeai==0.8.3
-supabase==<version-if-used>
+psycopg2-binary==2.9.10
+python-dotenv==1.0.1
+pydantic==2.9.0
