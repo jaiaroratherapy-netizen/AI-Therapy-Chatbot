@@ -24,3 +24,5 @@ requests==2.31.0
 
 # Additional utilities (already included in above, but good to know)
 typing-extensions==4.8.0
+
+google-generativeai==0.8.3
