@@ -1,6 +1,6 @@
 """
 AI Therapy Chatbot - Streamlit Frontend
-Updated: Cleaner sidebar with Load Session button
+Updated: Smart resume logic - only creates sessions when user sends first message
 """
 
 import streamlit as st
@@ -125,7 +125,7 @@ def show_login_screen():
         
         if not check_backend_health():
             st.error("⚠️ Backend server is not running!")
-            st.code("python backend.py", language="bash")
+            st.code("python backend_gemini.py", language="bash")
             return
         
         with st.form("login_form"):
@@ -142,22 +142,50 @@ def show_login_screen():
                     st.warning("⚠️ Please enter a valid email")
                     return
                 
-                with st.spinner("Creating your session..."):
-                    session_id, session_name, error = create_new_session(
-                        email.strip().lower(), name.strip()
-                    )
+                # Set user info
+                st.session_state.logged_in = True
+                st.session_state.current_user_id = email.strip().lower()
+                st.session_state.current_user_name = name.strip()
                 
-                if error:
-                    st.error(f"❌ {error}")
+                # Smart Resume Logic
+                with st.spinner("Loading your sessions..."):
+                    sessions, error = get_user_sessions(email.strip().lower())
+                
+                if not error and sessions and len(sessions) > 0:
+                    # User has existing sessions
+                    latest_session = sessions[0]  # Already sorted by created_at DESC
+                    
+                    if latest_session["message_count"] > 0:
+                        # Last session has messages - load it
+                        messages, sess_name, error = get_conversation(
+                            email.strip().lower(),
+                            latest_session["session_id"]
+                        )
+                        
+                        if not error:
+                            st.session_state.current_session_id = latest_session["session_id"]
+                            st.session_state.current_session_name = sess_name
+                            st.session_state.messages = messages
+                            st.success(f"✅ Welcome back, {name}! Resuming {sess_name}")
+                        else:
+                            # Error loading - start fresh
+                            st.session_state.current_session_id = None
+                            st.session_state.current_session_name = None
+                            st.session_state.messages = []
+                    else:
+                        # Last session is empty - start fresh
+                        st.session_state.current_session_id = None
+                        st.session_state.current_session_name = None
+                        st.session_state.messages = []
+                        st.success(f"✅ Welcome, {name}!")
                 else:
-                    st.session_state.logged_in = True
-                    st.session_state.current_user_id = email.strip().lower()
-                    st.session_state.current_user_name = name.strip()
-                    st.session_state.current_session_id = session_id
-                    st.session_state.current_session_name = session_name
+                    # First time user or no sessions - start fresh
+                    st.session_state.current_session_id = None
+                    st.session_state.current_session_name = None
                     st.session_state.messages = []
                     st.success(f"✅ Welcome, {name}!")
-                    st.rerun()
+                
+                st.rerun()
 
 # ============================================
 # Chat Screen
@@ -165,7 +193,7 @@ def show_login_screen():
 
 def show_chat_screen():
     # ============================================
-    # Sidebar - UPDATED DESIGN
+    # Sidebar
     # ============================================
     
     with st.sidebar:
@@ -178,20 +206,12 @@ def show_chat_screen():
         
         # New Chat Button
         if st.button("➕ New Chat", use_container_width=True):
-            with st.spinner("Creating new session..."):
-                session_id, session_name, error = create_new_session(
-                    st.session_state.current_user_id,
-                    st.session_state.current_user_name
-                )
-            
-            if error:
-                st.error(f"❌ {error}")
-            else:
-                st.session_state.current_session_id = session_id
-                st.session_state.current_session_name = session_name
-                st.session_state.messages = []
-                st.success(f"✅ Started {session_name}")
-                st.rerun()
+            # Just reset to None - session will be created when user sends first message
+            st.session_state.current_session_id = None
+            st.session_state.current_session_name = None
+            st.session_state.messages = []
+            st.success("✅ Started new chat")
+            st.rerun()
         
         # Load sessions list
         sessions, error = get_user_sessions(st.session_state.current_user_id)
@@ -206,7 +226,10 @@ def show_chat_screen():
             
             # Find current session index
             try:
-                current_idx = session_names.index(st.session_state.current_session_name)
+                if st.session_state.current_session_name:
+                    current_idx = session_names.index(st.session_state.current_session_name)
+                else:
+                    current_idx = 0
             except (ValueError, AttributeError):
                 current_idx = 0
             
@@ -263,7 +286,6 @@ def show_chat_screen():
     
     st.title("💬 Chat with Pritam")
     st.markdown("*21-year-old from Delhi University. Reserved and hesitant to open up.*")
-    st.markdown("---")
     
     # Display chat messages
     for msg in st.session_state.messages:
@@ -278,7 +300,23 @@ def show_chat_screen():
     user_input = st.chat_input("Type your message as a therapist...")
     
     if user_input:
-        # Add user message
+        # Check if we need to create a session first
+        if st.session_state.current_session_id is None:
+            # First message - create session now
+            with st.spinner("Creating session..."):
+                session_id, session_name, error = create_new_session(
+                    st.session_state.current_user_id,
+                    st.session_state.current_user_name
+                )
+            
+            if error:
+                st.error(f"❌ Failed to create session: {error}")
+                return
+            else:
+                st.session_state.current_session_id = session_id
+                st.session_state.current_session_name = session_name
+        
+        # Add user message to display
         st.session_state.messages.append({
             "role": "student",
             "content": user_input,
@@ -312,10 +350,6 @@ def show_chat_screen():
                 st.markdown(ai_response)
             
             st.rerun()
-    
-    # Help section at bottom
-    st.markdown("---")
-    st.markdown("💡 **Tip:** Breathe and make mistakes :)")
 
 # ============================================
 # Main App Logic
