@@ -7,9 +7,6 @@ fastapi==0.104.1
 uvicorn==0.24.0
 pydantic==2.5.0
 
-# AI/LLM Integration
-groq==0.4.1
-
 # Database
 psycopg2-binary==2.9.9
 
