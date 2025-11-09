@@ -164,8 +164,14 @@ def chat(request: ChatRequest):
         ai_response = response.text
         
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print("=" * 50)
+        print("🔴 GEMINI API ERROR:")
+        print(error_details)
+        print("=" * 50)
         raise HTTPException(status_code=500, detail=f"Gemini API error: {str(e)}")
-    
+
     # Save both messages to database
     save_message(request.session_id, "user", request.message)
     save_message(request.session_id, "assistant", ai_response)
