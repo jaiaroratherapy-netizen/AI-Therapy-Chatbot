@@ -284,7 +284,7 @@ def show_chat_screen():
     # ============================================
     
     st.title("💬 Chat with Pritam")
-    st.markdown("*21-year-old from Delhi University. Reserved and hesitant to open up.*")
+    st.markdown("*23-year-old from Mumbai University.*")
     
     # Display chat messages
     for msg in st.session_state.messages:
