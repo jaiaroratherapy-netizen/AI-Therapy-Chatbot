@@ -48,7 +48,7 @@ if "sessions_list" not in st.session_state:
 
 def check_backend_health() -> bool:
     try:
-        response = requests.get(f"{API_BASE_URL}/", timeout=2)
+        response = requests.get(f"{API_BASE_URL}/", timeout=90)
         return response.status_code == 200
     except requests.exceptions.RequestException:
         return False
@@ -58,7 +58,7 @@ def create_new_session(email: str, name: str) -> tuple:
         response = requests.post(
             f"{API_BASE_URL}/sessions/new",
             json={"user_id": email, "name": name},
-            timeout=5
+            timeout=90
         )
         if response.status_code == 200:
             data = response.json()
@@ -73,7 +73,7 @@ def send_message_to_api(user_id: str, session_id: str, message: str) -> tuple:
         response = requests.post(
             f"{API_BASE_URL}/chat",
             json={"user_id": user_id, "session_id": session_id, "message": message},
-            timeout=30
+            timeout=90
         )
         if response.status_code == 200:
             data = response.json()
@@ -85,7 +85,7 @@ def send_message_to_api(user_id: str, session_id: str, message: str) -> tuple:
 
 def get_user_sessions(user_id: str) -> tuple:
     try:
-        response = requests.get(f"{API_BASE_URL}/users/{user_id}/sessions", timeout=5)
+        response = requests.get(f"{API_BASE_URL}/users/{user_id}/sessions", timeout=90)
         if response.status_code == 200:
             return response.json(), None
         else:
@@ -98,7 +98,7 @@ def get_conversation(user_id: str, session_id: str) -> tuple:
         response = requests.get(
             f"{API_BASE_URL}/conversations/{session_id}",
             params={"user_id": user_id},
-            timeout=5
+            timeout=90
         )
         if response.status_code == 200:
             data = response.json()
