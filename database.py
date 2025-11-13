@@ -279,7 +279,7 @@ def get_session_name(session_id: str, email: str) -> Optional[str]:
             SELECT s.created_at,
                    (SELECT COUNT(*) FROM sessions s2 
                     JOIN students st2 ON s2.student_id = st2.student_id
-                    WHERE st2.email = %s AND s2.created_at >= s.created_at) as session_number
+                    WHERE st2.email = %s AND s2.created_at <= s.created_at) as session_number
             FROM sessions s
             JOIN students st ON s.student_id = st.student_id
             WHERE s.session_id = %s AND st.email = %s
