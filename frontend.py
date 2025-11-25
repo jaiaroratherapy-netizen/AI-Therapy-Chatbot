@@ -1,6 +1,7 @@
 """
 AI Therapy Chatbot - Streamlit Frontend
 Updated: Smart resume logic - only creates sessions when user sends first message
+Updated: Added Pritam's opening scene-setting message
 """
 
 import streamlit as st
@@ -12,6 +13,13 @@ from typing import List, Dict, Optional
 # ============================================
 import os
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
+
+# Pritam's opening message with scene-setting
+PRITAM_OPENING = """[Pritam is sitting on a worn brown sofa in a small, dimly lit living room. Sunlight filters through half-drawn curtains. He looks up briefly as you enter, makes eye contact for a moment, then glances down at his hands with a slight, uncertain smile.]
+
+"Hello"
+"""
+
 # ============================================
 # Page Configuration
 # ============================================
@@ -167,21 +175,33 @@ def show_login_screen():
                             st.session_state.messages = messages
                             st.success(f"✅ Welcome back, {name}! Resuming {sess_name}")
                         else:
-                            # Error loading - start fresh
+                            # Error loading - start fresh with greeting
                             st.session_state.current_session_id = None
                             st.session_state.current_session_name = None
-                            st.session_state.messages = []
+                            st.session_state.messages = [{
+                                "role": "ai",
+                                "content": PRITAM_OPENING,
+                                "timestamp": ""
+                            }]
                     else:
-                        # Last session is empty - start fresh
+                        # Last session is empty - start fresh with greeting
                         st.session_state.current_session_id = None
                         st.session_state.current_session_name = None
-                        st.session_state.messages = []
+                        st.session_state.messages = [{
+                            "role": "ai",
+                            "content": PRITAM_OPENING,
+                            "timestamp": ""
+                        }]
                         st.success(f"✅ Welcome, {name}!")
                 else:
-                    # First time user or no sessions - start fresh
+                    # First time user or no sessions - start fresh with greeting
                     st.session_state.current_session_id = None
                     st.session_state.current_session_name = None
-                    st.session_state.messages = []
+                    st.session_state.messages = [{
+                        "role": "ai",
+                        "content": PRITAM_OPENING,
+                        "timestamp": ""
+                    }]
                     st.success(f"✅ Welcome, {name}!")
                 
                 st.rerun()
@@ -205,10 +225,14 @@ def show_chat_screen():
         
         # New Chat Button
         if st.button("➕ New Chat", use_container_width=True):
-            # Just reset to None - session will be created when user sends first message
+            # Reset to None with Pritam's greeting - session will be created when user sends first message
             st.session_state.current_session_id = None
             st.session_state.current_session_name = None
-            st.session_state.messages = []
+            st.session_state.messages = [{
+                "role": "ai",
+                "content": PRITAM_OPENING,
+                "timestamp": ""
+            }]
             st.success("✅ Started new chat")
             st.rerun()
         
