@@ -284,7 +284,7 @@ def show_chat_screen():
     # ============================================
     
     st.title("Session with Pritam")
-    st.markdown("*BIO: 21-year-old man from Mumbai University. He is reserved and sometimes a tad bit rude. He won't open up easily and will resist, but if you use your micro-skills like Open ended questions, paraphrasing and reflection of feeling well, he certainly would tell you more. If this feels intimidating, please breathe and keep going:)*")
+    st.markdown("*BIO: He is reserved 21 year old student. He won't open up easily and might resist, but if you use micro-skills like Open ended questions, paraphrasing and reflection of feeling well, he certainly would tell you more. You can start with something like 'hello, how are you' or 'what brings you to therapy?'*")
     
     # Display chat messages
     for msg in st.session_state.messages:
