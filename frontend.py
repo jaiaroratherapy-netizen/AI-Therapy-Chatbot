@@ -15,7 +15,7 @@ import os
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 # Pritam's opening message with scene-setting
-PRITAM_OPENING = """(Pritam is sitting is sitting in his room. He looks up briefly as you enter, makes eye contact for a moment, then glances down at his hands with a slight smile.) Hello
+PRITAM_OPENING = """(Pritam is sitting is sitting in his room. He looks up briefly as you enter, makes eye contact for a moment, then glances down at his hands with a slight smile) Hello
 """
 
 # ============================================
