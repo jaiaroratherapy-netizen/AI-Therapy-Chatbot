@@ -1,5 +1,6 @@
 """
 Database connection and helper functions for Supabase
+Updated: Added IST timezone conversion for all timestamps
 """
 
 import psycopg2
@@ -9,6 +10,7 @@ import os
 from typing import Optional, List, Dict
 import uuid
 from dotenv import load_dotenv
+from datetime import datetime, timezone, timedelta
 
 # Load environment variables from .env file
 load_dotenv()
@@ -22,6 +24,36 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set!")
+
+# IST timezone (UTC + 5:30)
+IST = timezone(timedelta(hours=5, minutes=30))
+
+# ============================================
+# Helper Functions
+# ============================================
+
+def to_ist(utc_datetime) -> str:
+    """
+    Convert UTC datetime to IST and format as string
+    
+    Args:
+        utc_datetime: datetime object in UTC
+    
+    Returns:
+        Formatted string in IST: "YYYY-MM-DD HH:MM:SS"
+    """
+    if utc_datetime is None:
+        return ""
+    
+    # If datetime is naive (no timezone), assume it's UTC
+    if utc_datetime.tzinfo is None:
+        utc_datetime = utc_datetime.replace(tzinfo=timezone.utc)
+    
+    # Convert to IST
+    ist_datetime = utc_datetime.astimezone(IST)
+    
+    # Format with date and time
+    return ist_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
 # ============================================
 # Connection Pool Helper
@@ -168,7 +200,7 @@ def get_conversation_history(session_id: str) -> List[Dict]:
         session_id: UUID of the session
     
     Returns:
-        List of message dicts with role, content, timestamp
+        List of message dicts with role, content, timestamp (in IST)
     """
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -185,12 +217,12 @@ def get_conversation_history(session_id: str) -> List[Dict]:
         
         messages = cursor.fetchall()
         
-        # Convert to list of dicts
+        # Convert to list of dicts with IST timestamps
         return [
             {
                 "role": msg['sender_type'],
                 "content": msg['content'],
-                "timestamp": msg['created_at'].strftime("%Y-%m-%d %H:%M:%S")
+                "timestamp": to_ist(msg['created_at'])  # Convert to IST
             }
             for msg in messages
         ]
@@ -203,7 +235,7 @@ def get_user_sessions(email: str) -> List[Dict]:
         email: Student's email
     
     Returns:
-        List of session dicts with id, name, created_at, message_count
+        List of session dicts with id, name, created_at (in IST), message_count
     """
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -233,7 +265,7 @@ def get_user_sessions(email: str) -> List[Dict]:
             session_list.append({
                 "session_id": str(session['session_id']),
                 "session_name": f"Session-{len(sessions) - idx}",
-                "created_at": session['created_at'].strftime("%Y-%m-%d %H:%M:%S"),
+                "created_at": to_ist(session['created_at']),  # Convert to IST
                 "message_count": session['message_count']
             })
         
@@ -305,6 +337,12 @@ def test_connection():
             cursor = conn.cursor()
             cursor.execute("SELECT 1")
             print("✅ Database connection successful!")
+            
+            # Test IST conversion
+            cursor.execute("SELECT CURRENT_TIMESTAMP as now")
+            result = cursor.fetchone()
+            print(f"✅ Current time in IST: {to_ist(result['now'])}")
+            
             return True
     except Exception as e:
         print(f"❌ Database connection failed: {e}")
@@ -313,5 +351,3 @@ def test_connection():
 if __name__ == "__main__":
     # Test the connection when running this file directly
     test_connection()
-
-    
