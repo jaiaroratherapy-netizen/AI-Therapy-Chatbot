@@ -15,7 +15,7 @@ import os
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 # Pritam's opening message with scene-setting
-PRITAM_OPENING = """(Pritam is sitting is sitting in his room. He looks up briefly as you enter, makes eye contact for a moment, then glances down at his hands with a slight smile) Hello
+PRITAM_OPENING = """(Pritam is sitting in his room. He looks up briefly as you enter, makes eye contact for a moment, then glances down at his hands with a slight smile) Hello
 """
 
 # ============================================
@@ -306,7 +306,7 @@ def show_chat_screen():
     # ============================================
     
     st.title("Session with Pritam")
-    st.markdown("*BIO: He is reserved 21 year old student. He won't open up easily and might resist, but if you use micro-skills like Open ended questions, paraphrasing and reflection of feeling well, he certainly would tell you more. You can start with something like 'hello, how are you' or 'what brings you to therapy?'*")
+    st.markdown("*He is a reserved 21 year old student. He does not open up easily and might resist, but if you use micro-skills like Open ended questions, paraphrasing, reflection of feeling and take it slow, he certainly would tell you more. You can start with something like 'hello, how are you' or 'what brings you to therapy? All the best :)'*")
     
     # Display chat messages
     for msg in st.session_state.messages:
